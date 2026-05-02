@@ -8,11 +8,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from django.conf import settings
+
 def index(request):
     """
     Serve the frontend dashboard.
     """
-    return render(request, 'inventory/index.html')
+    context = {
+        'API_BASE_URL': settings.API_BASE_URL
+    }
+    return render(request, 'inventory/index.html', context)
 
 @api_view(['GET'])
 def health_check(request):

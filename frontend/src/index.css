@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #1b2028;
+  --muted: #5b6573;
+  --bg: #f7f2ea;
+  --surface: #fffdf8;
+  --surface-muted: #f2ede4;
+  --border: #dfd6c8;
+  --accent-strong: #ff6a00;
+  --accent-soft: rgba(255, 106, 0, 0.15);
+  --accent-contrast: #1b2028;
+  --success: #0f8c5f;
+  --danger: #d04728;
+  --shadow: 0 18px 45px rgba(34, 30, 20, 0.12);
+
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink);
+  background-color: var(--bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 214, 170, 0.45), transparent 55%),
+    radial-gradient(circle at 80% 10%, rgba(255, 239, 200, 0.6), transparent 50%),
+    linear-gradient(140deg, #f7f2ea 0%, #efe9dd 50%, #f6efe4 100%);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1,
+h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(32px, 4.5vw, 56px);
+}
+
+h2 {
+  font-size: 22px;
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--surface-muted);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.9em;
+}

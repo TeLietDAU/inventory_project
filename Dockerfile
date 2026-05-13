@@ -1,7 +1,9 @@
-# Use official Python runtime as base image
+# ================================
+# Production Dockerfile for Render
+# ================================
 FROM python:3.11-slim
 
-# Set working directory in container
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
@@ -9,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements first (layer cache optimization)
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
@@ -17,8 +19,11 @@ RUN pip install --upgrade pip && \
 # Copy project files
 COPY . .
 
+# Create logs directory (required by settings.py)
+RUN mkdir -p logs
+
 # Expose port
 EXPOSE 8000
 
-# Run migrations, create sample data if needed, and start Django development server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py populate_inventory && python manage.py runserver 0.0.0.0:8000"]
+# Production: migrate + populate + gunicorn
+CMD ["sh", "-c", "python manage.py migrate && python manage.py populate_inventory && gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120"]

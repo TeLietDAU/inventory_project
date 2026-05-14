@@ -34,6 +34,9 @@ ALLOWED_HOSTS = ['*']
 
 # API Base URL
 API_BASE_URL = os.getenv('API_BASE_URL', '/api')
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+]
 
 
 # Application definition
@@ -44,12 +47,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'app',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

@@ -1,0 +1,134 @@
+.app {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 48px 32px 72px;
+  box-sizing: border-box;
+}
+
+.hero {
+  max-width: 720px;
+}
+
+.hero h1 {
+  margin: 16px 0 12px;
+}
+
+.hero p {
+  font-size: 18px;
+  max-width: 560px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  margin: 0 0 12px;
+}
+
+.status {
+  font-weight: 600;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  margin: 0 0 16px;
+}
+
+.status.loading {
+  color: var(--accent-strong);
+}
+
+.status.ok {
+  color: var(--success);
+}
+
+.status.error {
+  color: var(--danger);
+}
+
+button.primary {
+  border: none;
+  background: var(--accent-strong);
+  color: var(--accent-contrast);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+}
+
+button.primary:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
+dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+dl div {
+  display: grid;
+  gap: 6px;
+}
+
+dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+}
+
+dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.tips ul {
+  padding-left: 18px;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 32px 20px 48px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+}

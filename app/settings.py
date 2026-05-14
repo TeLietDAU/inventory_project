@@ -34,9 +34,16 @@ ALLOWED_HOSTS = ['*']
 
 # API Base URL
 API_BASE_URL = os.getenv('API_BASE_URL', '/api')
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-]
+
+cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if cors_origins:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip() for origin in cors_origins.split(',') if origin.strip()
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:5173',
+    ]
 
 
 # Application definition

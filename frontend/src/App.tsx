@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
     return apiBaseUrl.replace(/\/+$/, '')
   }, [apiBaseUrl])
 
-  const checkHealth = async () => {
+  const checkHealth = useCallback(async () => {
     if (!normalizedBaseUrl) {
       setStatus('error')
       setMessage('Missing VITE_API_BASE_URL in frontend .env file.')
@@ -46,11 +46,11 @@ function App() {
     } finally {
       window.clearTimeout(timeoutId)
     }
-  }
+  }, [normalizedBaseUrl])
 
   useEffect(() => {
     void checkHealth()
-  }, [normalizedBaseUrl])
+  }, [checkHealth])
 
   return (
     <div className="app">

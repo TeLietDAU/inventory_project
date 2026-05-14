@@ -1,0 +1,13 @@
+Incident 1 (CORS bị chặn trên production): Hiện tượng: frontend ở domain khác gọi API bị trình duyệt chặn,
+lỗi CORS trong console, request không tới backend | Nguyên nhân: CORS_ALLOWED_ORIGINS chỉ default
+http://localhost:5173, không set biến môi trường khi deploy app/settings.py | Cách fix: khai báo
+CORS_ALLOWED_ORIGINS đúng domain frontend (ví dụ https://your-frontend.com) hoặc dùng 
+CORS_ALLOWED_ORIGIN_REGEXES nếu cần.
+Incident 2 (Xuất kho đồng thời dẫn đến âm kho): Hiện tượng: nhiều yêu cầu xuất kho cùng lúc, tất cả đều qua
+validate, kết quả stock bị âm hoặc vượt tồn kho | Nguyên nhân: validate dựa trên tồn kho hiện tại nhưng không
+có khóa đồng bộ, không có transaction/lock app/serializers.py và app/models.py | Cách fix: dùng transaction.atomic()
+ và select_for_update() trên Item khi xuất kho; cập nhật tồn kho bằng F() và kiểm tra trong transaction.
+Incident 3 (Lệch số liệu tồn kho và log): Hiện tượng: stock_quantity đã cập nhật nhưng log giao dịch không được
+ghi (hoặc lỗi giữa chừng), dẫn đến sai lệch audit | Nguyên nhân: item.save() được gọi trước StockLog.save() và 
+không có transaction; nếu super().save() lỗi thì stock đã bị thay đổi app/models.py | Cách fix: bọc toàn bộ thao
+ tác vào transaction.atomic(); nếu cần, dùng select_for_update() và cập nhật bằng F() để tránh sai lệch.

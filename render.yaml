@@ -1,0 +1,17 @@
+# render.yaml - Render Infrastructure as Code
+# Đặt file này ở root của repo
+
+services:
+  - type: web
+    name: inventory-management
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true        # Render tự sinh secret key an toàn
+      - key: DEBUG
+        value: "False"
+      - key: API_BASE_URL
+        value: /api
+    healthCheckPath: /api/health

@@ -1,0 +1,67 @@
+Incident 1 (CORS bị chặn trên production): Hiện tượng: frontend ở domain khác gọi API bị trình duyệt chặn,
+lỗi CORS trong console, request không tới backend | Nguyên nhân: CORS_ALLOWED_ORIGINS chỉ default
+http://localhost:5173, không set biến môi trường khi deploy app/settings.py | Cách fix: khai báo
+CORS_ALLOWED_ORIGINS đúng domain frontend (ví dụ https://your-frontend.com) hoặc dùng 
+CORS_ALLOWED_ORIGIN_REGEXES nếu cần.
+Incident 2 (Xuất kho đồng thời dẫn đến âm kho): Hiện tượng: nhiều yêu cầu xuất kho cùng lúc, tất cả đều qua
+validate, kết quả stock bị âm hoặc vượt tồn kho | Nguyên nhân: validate dựa trên tồn kho hiện tại nhưng không
+có khóa đồng bộ, không có transaction/lock app/serializers.py và app/models.py | Cách fix: dùng transaction.atomic()
+ và select_for_update() trên Item khi xuất kho; cập nhật tồn kho bằng F() và kiểm tra trong transaction.
+Incident 3 (Lệch số liệu tồn kho và log): Hiện tượng: stock_quantity đã cập nhật nhưng log giao dịch không được
+ghi (hoặc lỗi giữa chừng), dẫn đến sai lệch audit | Nguyên nhân: item.save() được gọi trước StockLog.save() và 
+không có transaction; nếu super().save() lỗi thì stock đã bị thay đổi app/models.py | Cách fix: bọc toàn bộ thao
+ tác vào transaction.atomic(); nếu cần, dùng select_for_update()  và cập nhật bằng F() để tránh sai lệch.
+ Incident 1 — CORS bị chặn trên production
+
+L4 (Frontend)
+Hiện tượng: Trình duyệt báo lỗi CORS trong console; request bị chặn ngay ở client, không thấy tới backend.
+Nguyên nhân: Frontend chạy ở domain khác nhưng không nằm trong danh sách origin được phép.
+Cách fix: Đảm bảo domain frontend hợp lệ và thống nhất (ví dụ https://your-frontend.com), tránh dùng domain khác với cấu hình backend.
+L3 (Backend)
+Hiện tượng: Backend không nhận request vì bị browser chặn trước khi gửi.
+Nguyên nhân: CORS_ALLOWED_ORIGINS chỉ có mặc định localhost; biến môi trường không được set khi deploy.
+Cách fix: Cấu hình CORS_ALLOWED_ORIGINS đúng domain production; nếu nhiều domain động thì dùng regex.
+L2 (External)
+Hiện tượng: Trình duyệt (chính sách CORS) chặn cross-origin.
+Nguyên nhân: Chính sách bảo mật của browser yêu cầu server cấp phép origin rõ ràng.
+Cách fix: Xem lại chính sách CORS theo chuẩn browser, xác nhận preflight được trả về đúng.
+L1 (Infrastructure)
+Hiện tượng: Khi deploy, env var không được inject.
+Nguyên nhân: Pipeline/host không set biến môi trường hoặc cấu hình secret sai.
+Cách fix: Kiểm tra cấu hình deploy, đảm bảo env CORS_ALLOWED_ORIGINS được set đúng và có hiệu lực.
+Incident 2 — Xuất kho đồng thời dẫn đến âm kho
+
+L4 (Frontend)
+Hiện tượng: Người dùng gửi nhiều yêu cầu xuất kho gần như cùng lúc; UI báo thành công cho tất cả.
+Nguyên nhân: Frontend không có cơ chế chặn double-submit hoặc giới hạn thao tác đồng thời.
+Cách fix: Thêm disable nút sau khi submit, debounce hoặc khóa thao tác trong UI.
+L3 (Backend)
+Hiện tượng: Nhiều request cùng vượt qua validate; tồn kho bị âm hoặc vượt quá tồn thực tế.
+Nguyên nhân: Validation dựa trên tồn kho tại thời điểm đọc, không có transaction/lock để đảm bảo tính nhất quán.
+Cách fix: Bọc xử lý xuất kho trong transaction, khóa bản ghi item (select_for_update), cập nhật bằng F() và kiểm tra trong cùng transaction.
+L2 (External)
+Hiện tượng: Các request đến gần như đồng thời (concurrency).
+Nguyên nhân: Client, load balancer, hoặc multi-worker tạo điều kiện cho race condition.
+Cách fix: Chấp nhận concurrency là bình thường; xử lý an toàn ở backend bằng lock/atomic.
+L1 (Infrastructure)
+Hiện tượng: Nhiều worker/process chạy song song.
+Nguyên nhân: Môi trường production thường có nhiều worker để tăng throughput.
+Cách fix: Không giảm worker để “tránh” lỗi; thay vào đó đảm bảo tính nhất quán dữ liệu ở tầng backend.
+Incident 3 — Lệch số liệu tồn kho và log
+
+L4 (Frontend)
+Hiện tượng: UI thấy stock đã thay đổi nhưng log giao dịch không xuất hiện hoặc thiếu.
+Nguyên nhân: Frontend chỉ phản ánh dữ liệu cuối; không biết backend ghi log thất bại.
+Cách fix: Hiển thị trạng thái giao dịch rõ ràng; dùng phản hồi backend để xác nhận log.
+L3 (Backend)
+Hiện tượng: Stock cập nhật nhưng log không được ghi.
+Nguyên nhân: Update stock xảy ra trước khi ghi log; không có transaction nên nếu ghi log lỗi thì stock đã bị đổi.
+Cách fix: Bọc toàn bộ update + log trong transaction; nếu cần khóa record và cập nhật bằng F() để tránh sai lệch.
+L2 (External)
+Hiện tượng: Lỗi giữa chừng do DB hoặc hệ thống.
+Nguyên nhân: Các failure ngẫu nhiên khi ghi log (timeout, exception).
+Cách fix: Thiết kế transaction atomic để rollback toàn bộ khi bất kỳ bước nào lỗi.
+L1 (Infrastructure)
+Hiện tượng: DB/IO có thể lỗi tạm thời.
+Nguyên nhân: Hạ tầng có thể gặp timeout hoặc spike.
+Cách fix: Giữ transaction nhỏ, tối ưu index, và giám sát lỗi DB để giảm xác suất lỗi.

@@ -10,4 +10,4 @@ có khóa đồng bộ, không có transaction/lock app/serializers.py và app/m
 Incident 3 (Lệch số liệu tồn kho và log): Hiện tượng: stock_quantity đã cập nhật nhưng log giao dịch không được
 ghi (hoặc lỗi giữa chừng), dẫn đến sai lệch audit | Nguyên nhân: item.save() được gọi trước StockLog.save() và 
 không có transaction; nếu super().save() lỗi thì stock đã bị thay đổi app/models.py | Cách fix: bọc toàn bộ thao
- tác vào transaction.atomic(); nếu cần, dùng select_for_update() và cập nhật bằng F() để tránh sai lệch.
+ tác vào transaction.atomic(); nếu cần, dùng select_for_update()  và cập nhật bằng F() để tránh sai lệch.
